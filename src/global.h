@@ -8,3 +8,4 @@
 extern SDL_Renderer *g_renderer;
 extern SDL_Window *g_window;
 extern SDL_Texture *g_birdTexture;
+extern SDL_Texture *g_pipeTexture;

@@ -5,6 +5,7 @@
 #include "bird.h"
 #include "mathHelper.h"
 #include "audio.h"
+#include "pipe.h"
 
 static void s_bird_update_velocity(Bird *bird, float dt);
 static void s_bird_update_animation(Bird *bird, float dt);
@@ -57,10 +58,11 @@ void bird_update(Bird *bird, float dt) {
     s_bird_update_animation(bird, dt);
 
     bird->angle = lerpf(bird->angle, atanf(bird->velocity) * RADIANS_TO_DEGREES * 0.5f, dt * 30.f);
+}
 
+bool bird_is_colliding_with_frame(Bird *bird) {
     float halfHeight = bird->destRect.w * 0.5f;
-    if(bird->position + BIRD_COLLISION_MARGIN <= halfHeight || bird->position - BIRD_COLLISION_MARGIN >= WINDOW_H - halfHeight)
-        bird_die(bird);
+    return bird->position + BIRD_COLLISION_MARGIN <= 0 || bird->position - BIRD_COLLISION_MARGIN >= WINDOW_H;
 }
 
 static void s_bird_set_animation_frame(Bird *bird, uint8_t frame) {
