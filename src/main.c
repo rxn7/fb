@@ -2,25 +2,33 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_surface.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <time.h>
 #include "bird.h"
 #include "global.h"
 #include "audio.h"
+#include "pipe.h"
 
 SDL_Window *g_window = NULL;
 SDL_Renderer *g_renderer = NULL;
 SDL_Texture *g_birdTexture = NULL;
+SDL_Texture *g_pipeTexture = NULL;
 
 static Bird bird;
+static Pipe pipes[PIPE_COUNT];
 static bool shouldWindowClose = false;
 
 static bool init();
 static bool init_window();
 static bool init_renderer();
+static void init_pipes();
 static bool init_img();
 static void clean_up();
+static void game_over();
 static void handle_event(SDL_Event *event);
 static void update_title(int32_t fps);
+static void bird_pipe_collision_check(Bird *bird, Pipe *pipe);
 
 int main(int argc, char *argv[]) {
 	int32_t initStatus = init();
@@ -47,6 +55,15 @@ int main(int argc, char *argv[]) {
 		update_title(fps);
 		bird_update(&bird, dt);
 		bird_render(&bird, g_renderer);
+
+		if(bird_is_colliding_with_frame(&bird))
+			game_over();
+
+		for(uint8_t i=0; i<PIPE_COUNT; ++i) {
+			pipe_update(&pipes[i], dt);
+			bird_pipe_collision_check(&bird, &pipes[i]);
+			pipe_render(&pipes[i]);
+		}
 
 		SDL_RenderPresent(g_renderer);
 	}
@@ -94,6 +111,21 @@ static void handle_event(SDL_Event *event) {
 	}
 }
 
+void bird_pipe_collision_check(Bird *bird, Pipe *pipe) {
+    float halfBirdHeight = bird->destRect.h * 0.5f;
+    float halfBirdWidth = bird->destRect.w * 0.5f;
+    if(pipe->x < WINDOW_W * 0.5f + halfBirdWidth - BIRD_COLLISION_MARGIN && pipe->x + PIPE_W > WINDOW_W * 0.5f + BIRD_COLLISION_MARGIN) {
+        if(bird->position - halfBirdHeight + BIRD_COLLISION_MARGIN < pipe->gapPosition || bird->position + halfBirdHeight - BIRD_COLLISION_MARGIN > pipe->gapPosition + PIPE_GAP) {
+			game_over();
+        } 
+    }
+}
+
+static void game_over() {
+	bird_die(&bird);
+	init_pipes();
+}
+
 static void update_title(int32_t fps) {
 	char title[25];
 	sprintf(title, "Flappy Bird | FPS: %d", fps);
@@ -101,6 +133,8 @@ static void update_title(int32_t fps) {
 }
 
 static bool init() {
+	srand(time(NULL));
+
 	if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		SDL_Log("Failed to init SDL2: %s\n", SDL_GetError());
 		return false;
@@ -124,11 +158,18 @@ static bool init() {
 		return false;
 	}
 
+	g_pipeTexture = IMG_LoadTexture(g_renderer, "res/pipe.png");
+	if(!g_pipeTexture) {
+		SDL_Log("Failed to load pipe texture\n");
+		return false;
+	}
+
 	SDL_Surface *iconSurface = IMG_Load("res/icon.png");
 	SDL_SetWindowIcon(g_window, iconSurface);
 	SDL_FreeSurface(iconSurface);
 
 	bird_init(&bird);
+	init_pipes();
 
 	return 0;
 }
@@ -168,6 +209,12 @@ static bool init_img() {
 
 	SDL_Log("SDL2_image initialized\n");
 	return true;
+}
+
+static void init_pipes() {
+	pipe_init(&pipes[0], WINDOW_W);
+	for(uint8_t i = 1; i < PIPE_COUNT; ++i)
+		pipe_init(&pipes[i], pipes[i-1].x + GAP_BETWEEN_PIPES);
 }
 
 static void clean_up() {
