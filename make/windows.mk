@@ -4,7 +4,7 @@ BIN_DIR := bin/windows
 CFLAGS := $(shell x86_64-w64-mingw32-sdl2-config --cflags)
 LDFLAGS := $(shell x86_64-w64-mingw32-sdl2-config --libs) -lSDL2_image
 
-include shared.mk
+include make/shared.mk
 
 all: create_dirs copy_dlls copy_res $(OBJ) $(OUT)
 

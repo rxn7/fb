@@ -19,7 +19,10 @@ SDL_Texture *g_birdTexture = NULL;
 static Bird bird;
 static bool shouldWindowClose = false;
 
-static int32_t init();
+static bool init();
+static bool init_window();
+static bool init_renderer();
+static bool init_img();
 static void clean_up();
 static void handle_event(SDL_Event *event);
 static void update_title(int32_t fps);
@@ -86,37 +89,21 @@ static void update_title(int32_t fps) {
 	SDL_SetWindowTitle(g_window, title);
 }
 
-static int32_t init() {
+static bool init() {
 	if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		SDL_Log("Failed to init SDL2: %s\n", SDL_GetError());
-		return 1;
+		return false;
 	}
 	SDL_Log("SDL2 initialized\n");
 
-	g_window = SDL_CreateWindow("Flappy Bird", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
-	if(!g_window) {
-		SDL_Log("Failed to create SDL2 window: %s\n", SDL_GetError());
-		return 2;
-	}
-	SDL_Log("SDL2 window created\n");
-	
-	// Be sure the window will never get resized.
-	SDL_SetWindowResizable(g_window, SDL_FALSE);
-	SDL_SetWindowMinimumSize(g_window, WINDOW_W, WINDOW_H);
-	SDL_SetWindowMaximumSize(g_window, WINDOW_W, WINDOW_H);
+	if(!init_window())
+		return false;
 
-	g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if(!g_renderer) {
-		SDL_Log("Failed to init SDL2 renderer: %s\n", SDL_GetError());
-		return 3;
-	}
-	SDL_Log("SDL2 renderer created\n");
+	if(!init_renderer())
+		return false;
 
-	if(!IMG_Init(IMG_INIT_PNG)) {
-		SDL_Log("Failed to init SDL_Image: %s\n", IMG_GetError());
-		return 4;
-	}
-	SDL_Log("SDL2_image initialized\n");
+	if(!init_img())
+		return false;
 
 	SDL_Surface *birdTextureSurface = IMG_Load("res/bird.png");
 	if(!birdTextureSurface) {
@@ -129,6 +116,43 @@ static int32_t init() {
 	bird_init(&bird);
 
 	return 0;
+}
+
+static bool init_window() {
+	g_window = SDL_CreateWindow("Flappy Bird", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+	if(!g_window) {
+		SDL_Log("Failed to create SDL2 window: %s\n", SDL_GetError());
+		return false;
+	}
+	SDL_Log("SDL2 window created\n");
+	
+	// Be sure the window will never get resized.
+	SDL_SetWindowResizable(g_window, SDL_FALSE);
+	SDL_SetWindowMinimumSize(g_window, WINDOW_W, WINDOW_H);
+	SDL_SetWindowMaximumSize(g_window, WINDOW_W, WINDOW_H);
+
+	return true;
+}
+
+static bool init_renderer() {
+	g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	if(!g_renderer) {
+		SDL_Log("Failed to init SDL2 renderer: %s\n", SDL_GetError());
+		return false;
+	}
+
+	SDL_Log("SDL2 renderer initialized\n");
+	return true;
+}
+
+static bool init_img() {
+	if(!IMG_Init(IMG_INIT_PNG)) {
+		SDL_Log("Failed to init SDL_Image: %s\n", IMG_GetError());
+		return false;
+	}
+
+	SDL_Log("SDL2_image initialized\n");
+	return true;
 }
 
 static void clean_up() {
