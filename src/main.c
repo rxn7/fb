@@ -1,5 +1,6 @@
 #include <SDL2/SDL_error.h>
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keycode.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_surface.h>
@@ -76,8 +77,15 @@ static void handle_event(SDL_Event *event) {
 			break;
 
 		case SDL_KEYDOWN:
-			if(event->key.keysym.sym == SDLK_ESCAPE)
-				shouldWindowClose = true;
+			switch(event->key.keysym.sym) {
+				case SDLK_ESCAPE:
+					shouldWindowClose = true;
+					break;
+
+				case SDLK_SPACE:
+					bird_jump(&bird);
+					break;
+			}
 
 			break;
 	}
