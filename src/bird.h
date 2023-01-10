@@ -4,9 +4,11 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_render.h>
 
-#define BIRD_SPRITE_PARTS 4
+#define BIRD_ANIMATION_SPEED 0.1f
+#define BIRD_COLLISION_MARGIN 0.2f
+#define BIRD_SPRITE_PARTS 8
 #define BIRD_SCALE 2.5f
-#define BIRD_GRAVITY 150.f
+#define BIRD_GRAVITY 200.f
 #define BIRD_MAX_VELOCITY 300.0f
 #define BIRD_JUMP_VELOCITY -150.0f
 
@@ -16,6 +18,8 @@ typedef struct Bird {
     int32_t angle;
     SDL_Rect srcRect;
     SDL_FRect destRect;
+    float animationTimer;
+    uint8_t animationFrame;
 } Bird;
 
 void bird_init(Bird *bird);

@@ -2,7 +2,7 @@ CC := x86_64-w64-mingw32-gcc
 OBJ_DIR += obj/windows
 BIN_DIR := bin/windows
 CFLAGS := $(shell x86_64-w64-mingw32-sdl2-config --cflags)
-LDFLAGS := $(shell x86_64-w64-mingw32-sdl2-config --libs) -lSDL2_image
+LDFLAGS := $(shell x86_64-w64-mingw32-sdl2-config --libs) -lSDL2_image -lSDL2_mixer
 
 include make/shared.mk
 

@@ -1,3 +1,3 @@
 Push-Location bin/windows
-.\fb.exe
+Start-Process .\fb.exe -nonewwindow -wait
 Pop-Location
