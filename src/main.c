@@ -11,7 +11,7 @@
 #include <time.h>
 #include "bird.h"
 #include "global.h"
-#include "audio.h"
+#include "sfx.h"
 #include "pipe.h"
 
 SDL_Window *g_window = NULL;
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
 			bird_pipe_collision_check(&bird, pipe);
 			if(pipe_has_just_scored(pipe)) {
 				set_score(score+1);
-				printf("SCORE!\n");
+				sfx_play(SFX_SCORE);
 			}
 
 			pipe_render(pipe);
@@ -202,7 +202,8 @@ static bool init() {
 	if(!init_ttf())
 		return false;
 
-	audio_init();
+	if(!sfx_init())
+		return false;
 
 	bird_init(&bird);
 	init_pipes();
@@ -296,4 +297,6 @@ static void clean_up() {
 
 	TTF_CloseFont(font);
 	TTF_Quit();
+
+	sfx_clean_up();
 }

@@ -4,7 +4,7 @@
 #include "global.h"
 #include "bird.h"
 #include "mathHelper.h"
-#include "audio.h"
+#include "sfx.h"
 #include "pipe.h"
 
 static void s_bird_update_velocity(Bird *bird, float dt);
@@ -86,7 +86,7 @@ void bird_render(Bird *bird, SDL_Renderer *renderer) {
 
 void bird_jump(Bird *bird) {
     bird->velocity = BIRD_JUMP_VELOCITY;
-    audio_play_flap();
+    sfx_play(SFX_FLAP);
 }
 
 void bird_die(Bird *bird) {
