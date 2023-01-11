@@ -10,6 +10,7 @@ void pipe_init(Pipe *pipe, float x) {
 }
 
 void pipe_restart(Pipe *pipe) {
+    pipe->scored = false;
     pipe->gapPosition = rand_range(10, PIPE_H-10);
 }
 
@@ -40,4 +41,14 @@ void pipe_render(Pipe *pipe) {
 
     SDL_RenderCopyExF(g_renderer, g_pipeTexture, NULL, &topPipeRect, 0, NULL, SDL_FLIP_NONE);
     SDL_RenderCopyExF(g_renderer, g_pipeTexture, NULL, &bottomPipeRect, 0, NULL, SDL_FLIP_VERTICAL);
+}
+
+bool pipe_has_just_scored(Pipe *pipe) {
+    if(pipe->scored)
+        return false;
+
+    if(pipe->x + PIPE_W * 0.5f <= WINDOW_W * 0.5f)
+        pipe->scored = true;
+
+    return pipe->scored;
 }

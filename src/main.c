@@ -18,6 +18,7 @@ SDL_Texture *g_pipeTexture = NULL;
 static Bird bird;
 static Pipe pipes[PIPE_COUNT];
 static bool shouldWindowClose = false;
+static uint32_t score = 0;
 
 static bool init();
 static bool init_window();
@@ -59,10 +60,18 @@ int main(int argc, char *argv[]) {
 		if(bird_is_colliding_with_frame(&bird))
 			game_over();
 
+		Pipe *pipe;
 		for(uint8_t i=0; i<PIPE_COUNT; ++i) {
-			pipe_update(&pipes[i], dt);
-			bird_pipe_collision_check(&bird, &pipes[i]);
-			pipe_render(&pipes[i]);
+			pipe = &pipes[i];
+			pipe_update(pipe, dt);
+
+			bird_pipe_collision_check(&bird, pipe);
+			if(pipe_has_just_scored(pipe)) {
+				score++;
+				printf("SCORE!\n");
+			}
+
+			pipe_render(pipe);
 		}
 
 		SDL_RenderPresent(g_renderer);
@@ -122,6 +131,7 @@ void bird_pipe_collision_check(Bird *bird, Pipe *pipe) {
 }
 
 static void game_over() {
+	score = 0;
 	bird_die(&bird);
 	init_pipes();
 }

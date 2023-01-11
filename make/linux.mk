@@ -1,7 +1,7 @@
 CC := gcc
 OBJ_DIR += obj/linux
 BIN_DIR := bin/linux
-LDFLAGS += $(shell pkg-config --libs sdl2 SDL2_image)
+LDFLAGS += $(shell pkg-config --libs sdl2 SDL2_image SDL2_mixer) -lm
 
 include make/shared.mk
 

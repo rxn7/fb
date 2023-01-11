@@ -2,6 +2,9 @@
 
 #include "global.h"
 #include <SDL2/SDL_render.h>
+#include <stdbool.h>
+
+typedef struct Bird Bird;
 
 #define PIPE_SCROLL_SPEED 50
 
@@ -15,9 +18,11 @@
 typedef struct Pipe {
     float gapPosition;
     float x;
+    bool scored;
 } Pipe;
 
 void pipe_init(Pipe *pipe, float x);
 void pipe_restart(Pipe *pipe);
 void pipe_update(Pipe *pipe, float dt);
 void pipe_render(Pipe *pipe);
+bool pipe_has_just_scored(Pipe *pipe);
