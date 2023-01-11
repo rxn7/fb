@@ -5,4 +5,4 @@ LDFLAGS += $(shell pkg-config --libs sdl2 SDL2_image SDL2_mixer SDL2_ttf) -lm
 
 include make/shared.mk
 
-all: create_dirs copy_res $(OBJ) $(OUT)
+all: create_dirs copy_res copy_credits $(OBJ) $(OUT)

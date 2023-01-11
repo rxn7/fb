@@ -1,3 +1,5 @@
+.PHONY: copy_dlls all
+
 CC := x86_64-w64-mingw32-gcc
 OBJ_DIR += obj/windows
 BIN_DIR := bin/windows
@@ -6,7 +8,7 @@ LDFLAGS := $(shell x86_64-w64-mingw32-sdl2-config --libs) -lSDL2_image -lSDL2_mi
 
 include make/shared.mk
 
-all: create_dirs copy_dlls copy_res $(OBJ) $(OUT)
+all: create_dirs copy_dlls copy_res copy_credits $(OBJ) $(OUT)
 
 copy_dlls:
 	@echo -e "\e[32mCopying dlls...\e[0m" 
