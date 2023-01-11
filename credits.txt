@@ -1,0 +1,10 @@
+# Audio
+Background music by oldazatloukal: https://freesound.org/people/oldazatloukal/sounds/490173/
+Score sound by MATRIXXX_: https://freesound.org/people/MATRIXXX_/sounds/495650/ by 
+Flap sound by AgentDD: https://freesound.org/people/AgentDD/sounds/246225/ 
+
+# Graphics
+Bird by ma9ici4n: https://ma9ici4n.itch.io/pixel-art-bird-16x16
+
+# Fonts
+Public Pixel by GGBotNet: https://ggbot.itch.io/public-pixel-font
