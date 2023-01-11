@@ -1,6 +1,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -15,6 +19,8 @@ SDL_Renderer *g_renderer = NULL;
 SDL_Texture *g_birdTexture = NULL;
 SDL_Texture *g_pipeTexture = NULL;
 
+static SDL_Texture  *scoreTextTexture;
+static TTF_Font *font;
 static Bird bird;
 static Pipe pipes[PIPE_COUNT];
 static bool shouldWindowClose = false;
@@ -23,18 +29,22 @@ static uint32_t score = 0;
 static bool init();
 static bool init_window();
 static bool init_renderer();
+static bool init_ttf();
 static void init_pipes();
 static bool init_img();
 static void clean_up();
 static void game_over();
+static void render_score_text();
 static void handle_event(SDL_Event *event);
 static void update_title(int32_t fps);
+static void set_score(uint32_t score);
 static void bird_pipe_collision_check(Bird *bird, Pipe *pipe);
 
 int main(int argc, char *argv[]) {
-	int32_t initStatus = init();
-	if(initStatus != 0)
-		return initStatus;
+	if(!init())
+		return 1;
+
+	set_score(0);
 
 	SDL_Event event;
 	uint64_t now = SDL_GetPerformanceCounter();
@@ -54,11 +64,7 @@ int main(int argc, char *argv[]) {
 		SDL_RenderClear(g_renderer);
 
 		update_title(fps);
-		bird_update(&bird, dt);
-		bird_render(&bird, g_renderer);
-
-		if(bird_is_colliding_with_frame(&bird))
-			game_over();
+		render_score_text();
 
 		Pipe *pipe;
 		for(uint8_t i=0; i<PIPE_COUNT; ++i) {
@@ -67,12 +73,18 @@ int main(int argc, char *argv[]) {
 
 			bird_pipe_collision_check(&bird, pipe);
 			if(pipe_has_just_scored(pipe)) {
-				score++;
+				set_score(score+1);
 				printf("SCORE!\n");
 			}
 
 			pipe_render(pipe);
 		}
+
+		bird_update(&bird, dt);
+		bird_render(&bird, g_renderer);
+
+		if(bird_is_colliding_with_frame(&bird))
+			game_over();
 
 		SDL_RenderPresent(g_renderer);
 	}
@@ -131,15 +143,42 @@ void bird_pipe_collision_check(Bird *bird, Pipe *pipe) {
 }
 
 static void game_over() {
-	score = 0;
+	set_score(0);
 	bird_die(&bird);
 	init_pipes();
 }
 
 static void update_title(int32_t fps) {
-	char title[25];
-	sprintf(title, "Flappy Bird | FPS: %d", fps);
-	SDL_SetWindowTitle(g_window, title);
+	char buffer[25];
+	sprintf(buffer, "Flappy Bird | FPS: %d", fps);
+	SDL_SetWindowTitle(g_window, buffer);
+}
+
+static void render_score_text() {
+	SDL_Rect rect = {
+		.x = WINDOW_W * 0.5f,
+		.y = WINDOW_H * 0.5f,
+	};
+	SDL_QueryTexture(scoreTextTexture, NULL, NULL, &rect.w, &rect.h);
+
+	rect.x -= rect.w * 0.5f;
+	rect.y -= rect.h * 0.5f;
+
+	SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+	SDL_RenderCopy(g_renderer, scoreTextTexture, NULL, &rect);
+}
+
+static void set_score(uint32_t newScore) {
+	score = newScore;
+
+	SDL_Color color = {255, 255, 255};
+
+	char buffer[5];
+	sprintf(buffer, "%d", score);
+
+	SDL_Surface *surface = TTF_RenderText_Solid(font, buffer, color);
+	scoreTextTexture = SDL_CreateTextureFromSurface(g_renderer, surface);
+	SDL_FreeSurface(surface);
 }
 
 static bool init() {
@@ -160,28 +199,15 @@ static bool init() {
 	if(!init_img())
 		return false;
 
+	if(!init_ttf())
+		return false;
+
 	audio_init();
-
-	g_birdTexture = IMG_LoadTexture(g_renderer, "res/bird.png");
-	if(!g_birdTexture) {
-		SDL_Log("Failed to load bird texture\n");
-		return false;
-	}
-
-	g_pipeTexture = IMG_LoadTexture(g_renderer, "res/pipe.png");
-	if(!g_pipeTexture) {
-		SDL_Log("Failed to load pipe texture\n");
-		return false;
-	}
-
-	SDL_Surface *iconSurface = IMG_Load("res/icon.png");
-	SDL_SetWindowIcon(g_window, iconSurface);
-	SDL_FreeSurface(iconSurface);
 
 	bird_init(&bird);
 	init_pipes();
 
-	return 0;
+	return true;
 }
 
 static bool init_window() {
@@ -218,6 +244,38 @@ static bool init_img() {
 	}
 
 	SDL_Log("SDL2_image initialized\n");
+
+	g_birdTexture = IMG_LoadTexture(g_renderer, "res/bird.png");
+	if(!g_birdTexture) {
+		SDL_Log("Failed to load bird texture\n");
+		return false;
+	}
+
+	g_pipeTexture = IMG_LoadTexture(g_renderer, "res/pipe.png");
+	if(!g_pipeTexture) {
+		SDL_Log("Failed to load pipe texture\n");
+		return false;
+	}
+
+	SDL_Surface *iconSurface = IMG_Load("res/icon.png");
+	SDL_SetWindowIcon(g_window, iconSurface);
+	SDL_FreeSurface(iconSurface);
+
+	return true;
+}
+
+static bool init_ttf() {
+	if(TTF_Init() != 0) {
+		SDL_Log("Failed to init SDL_TTF: %s\n", TTF_GetError());
+		return false;
+	}
+
+	font = TTF_OpenFont("res/font.ttf", 64);
+	if(!font) {
+		SDL_Log("Failed to open font: %s\n", TTF_GetError());
+		return false;
+	}
+
 	return true;
 }
 
@@ -228,11 +286,14 @@ static void init_pipes() {
 }
 
 static void clean_up() {
-	SDL_Log("Quitting...\n");
-
 	SDL_DestroyTexture(g_birdTexture);
 	SDL_DestroyRenderer(g_renderer);
 	SDL_DestroyWindow(g_window);
+	SDL_DestroyTexture(scoreTextTexture);
 	SDL_Quit();
+
 	IMG_Quit();
+
+	TTF_CloseFont(font);
+	TTF_Quit();
 }
