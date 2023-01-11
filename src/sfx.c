@@ -47,7 +47,7 @@ void sfx_clean_up() {
 }
 
 void sfx_play(uint8_t sfxId) {
-    if(sfxId < 0 || sfxId >= SFX_COUNT) {
+    if(sfxId >= SFX_COUNT) {
         SDL_Log("Failed to play sound of id: %d, it's out of range (0-%d)\n", sfxId, SFX_COUNT);
         return;
     }
