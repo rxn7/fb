@@ -135,10 +135,8 @@ static void handle_event(SDL_Event *event) {
 void bird_pipe_collision_check(Bird *bird, Pipe *pipe) {
     float halfBirdHeight = bird->destRect.h * 0.5f;
     float halfBirdWidth = bird->destRect.w * 0.5f;
-    if(pipe->x < WINDOW_W * 0.5f + halfBirdWidth - BIRD_COLLISION_MARGIN && pipe->x + PIPE_W > WINDOW_W * 0.5f + BIRD_COLLISION_MARGIN) {
-        if(bird->position - halfBirdHeight + BIRD_COLLISION_MARGIN < pipe->gapPosition || bird->position + halfBirdHeight - BIRD_COLLISION_MARGIN > pipe->gapPosition + PIPE_GAP) {
-			game_over();
-        } 
+    if((pipe->x < WINDOW_W * 0.5f + halfBirdWidth - BIRD_COLLISION_MARGIN && pipe->x + PIPE_W > WINDOW_W * 0.5f + BIRD_COLLISION_MARGIN) && (bird->position - halfBirdHeight + BIRD_COLLISION_MARGIN < pipe->gapPosition || bird->position + halfBirdHeight - BIRD_COLLISION_MARGIN > pipe->gapPosition + PIPE_GAP)) {
+		game_over();
     }
 }
 
@@ -171,12 +169,10 @@ static void render_score_text() {
 static void set_score(uint32_t newScore) {
 	score = newScore;
 
-	SDL_Color color = {255, 255, 255};
-
 	char buffer[5];
 	sprintf(buffer, "%d", score);
 
-	SDL_Surface *surface = TTF_RenderText_Solid(font, buffer, color);
+	SDL_Surface *surface = TTF_RenderText_Solid(font, buffer, (SDL_Color){255,255,255,255});
 	scoreTextTexture = SDL_CreateTextureFromSurface(g_renderer, surface);
 	SDL_FreeSurface(surface);
 }
