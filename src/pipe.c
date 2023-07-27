@@ -14,8 +14,8 @@ void pipe_restart(Pipe *pipe) {
     pipe->gapPosition = rand_range(10, PIPE_H-10);
 }
 
-void pipe_update(Pipe *pipe, float dt) {
-    pipe->x -= dt * PIPE_SCROLL_SPEED;
+void pipe_update(Pipe *pipe, float scrollSpeed, float dt) {
+    pipe->x -= dt * scrollSpeed;
 
     if(pipe->x + PIPE_W <= 0) {
         pipe_init(pipe, pipe->x + PIPE_COUNT * GAP_BETWEEN_PIPES);

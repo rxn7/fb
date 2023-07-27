@@ -6,7 +6,8 @@
 
 typedef struct Bird Bird;
 
-#define PIPE_SCROLL_SPEED 50
+#define PIPE_SCROLL_SPEED 50.0f
+#define PIPE_MAX_SCROLL_SPEED 500.0f
 
 #define PIPE_W 65
 #define PIPE_H 373
@@ -23,6 +24,6 @@ typedef struct Pipe {
 
 void pipe_init(Pipe *pipe, float x);
 void pipe_restart(Pipe *pipe);
-void pipe_update(Pipe *pipe, float dt);
+void pipe_update(Pipe *pipe, float scrollSpeed, float dt);
 void pipe_render(Pipe *pipe);
 bool pipe_has_just_scored(Pipe *pipe);

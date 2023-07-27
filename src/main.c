@@ -25,6 +25,7 @@ static Bird bird;
 static Pipe pipes[PIPE_COUNT];
 static bool shouldWindowClose = false;
 static uint32_t score = 0;
+static float scrollSpeed = PIPE_SCROLL_SPEED;
 
 static bool init();
 static bool init_window();
@@ -66,12 +67,16 @@ int main(int argc, char *argv[]) {
 		update_title(fps);
 		render_score_text();
 
+		scrollSpeed += dt * 5.0f;
+		if(scrollSpeed >= PIPE_MAX_SCROLL_SPEED) scrollSpeed = PIPE_MAX_SCROLL_SPEED;
+
 		Pipe *pipe;
 		for(uint8_t i=0; i<PIPE_COUNT; ++i) {
 			pipe = &pipes[i];
-			pipe_update(pipe, dt);
 
+			pipe_update(pipe, scrollSpeed, dt);
 			bird_pipe_collision_check(&bird, pipe);
+
 			if(pipe_has_just_scored(pipe)) {
 				set_score(score+1);
 				sfx_play(SFX_SCORE);
@@ -141,6 +146,7 @@ void bird_pipe_collision_check(Bird *bird, Pipe *pipe) {
 }
 
 static void game_over() {
+	scrollSpeed = PIPE_SCROLL_SPEED;
 	set_score(0);
 	bird_die(&bird);
 	init_pipes();
